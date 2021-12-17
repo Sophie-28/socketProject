@@ -48,11 +48,11 @@ void* Child(void* arg)
 {   char line[DEFAULT_BUFLEN];
     int bytes_read;
     int client = *(int *)arg;
-    char w[DEFAULT_BUFLEN]="Welcome to Bob's Server \n";
+    char welmessag[DEFAULT_BUFLEN]="Welcome to Bob's Server \n";
 
     do
     {
-    	bytes_read=send(client,w , sizeof(w), 0);
+    	bytes_read=send(client,welmessag , sizeof(welmessag), 0); // displayes the welcome message to the client
     	
         bytes_read = recv(client, line, sizeof(line), 0);
         if (bytes_read > 0) {
