@@ -52,7 +52,7 @@ void* Child(void* arg)
 
     do
     {
-    	bytes_read=send(client,welmessag , sizeof(welmessag), 0); // displayes the welcome message to the client
+    	bytes_read=send(client,welmessag , sizeof(welmessag), 0); // Displayes the welcome message to the client
     	
         bytes_read = recv(client, line, sizeof(line), 0);
         if (bytes_read > 0) {
