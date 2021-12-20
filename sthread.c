@@ -32,18 +32,25 @@
 #include <resolv.h>
 #include <arpa/inet.h>
 #include <pthread.h>
-//#include<iostream>
+#include <string>
+#include<iostream>
+#include<vector>
+#include<sstream>
+#include<fstream>
 
 /* Definations */
 #define DEFAULT_BUFLEN 1024
-#define PORT 1086
+#define PORT 1089
 void PANIC(char* msg);
 #define PANIC(msg)  { perror(msg); exit(-1); }
-//using namespace std;
+using namespace std;
 
+string check(string val);
+void useracc(string val,string val2);
 /*--------------------------------------------------------------------*/
 /*--- Child - echo server                                         ---*/
 /*--------------------------------------------------------------------*/
+
 void* Child(void* arg)
 {   char line[DEFAULT_BUFLEN];
     int bytes_read;
@@ -56,8 +63,12 @@ void* Child(void* arg)
     	
         bytes_read = recv(client, line, sizeof(line), 0);
         if (bytes_read > 0) {
-        	printf(line );
-        	
+        //	printf(line );  
+		//cout<<line;   
+		check(line);
+	//	string h=line;
+
+
                 if ( (bytes_read=send(client, line, bytes_read, 0)) < 0 ) {
                         printf("Send failed\n");
                     
@@ -74,6 +85,96 @@ void* Child(void* arg)
     close(client);
     return arg;
 }
+string check(string val)
+{
+	//	string line;
+		string he;
+		vector<string> results;
+		
+	//	cout<<val;
+		for(int i=0;i<val.length();i++)
+		{
+			if(val[i]==' ')
+			{
+				he+=",";
+			}
+			else he+=val[i];
+		}
+		stringstream ss(he);
+			while(ss.good())
+				{
+					string b;
+					getline(ss,b,',');
+					results.push_back(b);
+		
+				}
+				//line=b;
+				string arresults[results.size()];
+			for(int i=0;i<results.size();i++)
+			{
+	//cout<<results.at(i)<<"\n";
+	arresults[i]=results[i];
+	cout<<arresults[i]<<"\n";
+	}
+			
+		if(arresults[0]=="USER")
+	{
+		cout<<"user";
+		string name=arresults[1];
+		string pass=arresults[2];		
+		useracc(name,pass);
+		//cout<<name<<pass<<"**";
+	
+	}
+	if(arresults[0]=="GET")
+	{
+		cout<<"get";
+	}
+	if(arresults[0]=="LIST")
+	{
+		cout<<"list";
+	}
+}
+
+void useracc(string val,string val2)
+{
+//	cout<<"stage0";	
+	ifstream file2("//home//student//21810009//pass.txt");
+		if(!file2.is_open())
+		{
+			cout<<"Failed to open\n";
+		}	
+	//	cout<<"stage1";	
+			string b,a;
+			string line;
+			int i=0;
+			while(file2.good())
+			{
+				cout<<"stage2";	
+				while(getline(file2, line))
+				{
+					cout<<"stage3";	
+					stringstream ss(line);
+					getline(ss,b,':');
+					getline(ss,a,':'); 
+				
+					if((b==val) && (a==val2))
+					{
+					
+						cout<<"user found";
+						i++;
+					}
+			}
+					cout<<"^&&^"<<b;
+					cout<<a;	
+		}
+		if(i==0)
+		{
+			cout<<"not ";
+		}
+ file2.close();
+}
+
 
 /*--------------------------------------------------------------------*/
 /*--- main - setup server and await connections (no need to clean  ---*/
@@ -118,7 +219,8 @@ int main(int argc, char *argv[])
 
     while (1)
     {
-        int client, addr_size = sizeof(addr);
+        int client;
+		socklen_t addr_size = sizeof(addr);
         pthread_t child;
 
         client = accept(sd, (struct sockaddr*)&addr, &addr_size);
