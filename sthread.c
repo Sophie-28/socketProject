@@ -22,11 +22,12 @@ void PANIC(char* msg);
 #define PANIC(msg)  { perror(msg); exit(-1); }
 using namespace std;
 
-void check(string val);
+void check(string val,int numb);
 void list(void);
 void useracc(string val,string val2);
-void get_file(string fname);
-void del_file(string filename);
+void get_file(string fname,int numb);
+void put_file(string filename,int numb);
+void del_file(string filename,int numb);
 //void useracc(string val,string val2);
 
 void* Child(void* arg)
@@ -41,7 +42,7 @@ void* Child(void* arg)
     	
         bytes_read = recv(client, line, sizeof(line), 0);
         if (bytes_read > 0) {
-		check(line);
+		check(line,client);
      if ( (bytes_read=send(client, line, bytes_read, 0)) < 0 ) {
                         printf("Send failed\n");
                     
@@ -102,6 +103,7 @@ int main(int argc, char *argv[])
         pthread_t child;
 
         client = accept(sd, (struct sockaddr*)&addr, &addr_size);
+        
         printf("Connected: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));//
         if ( pthread_create(&child, NULL, Child, &client) != 0 )
             perror("Thread creation");
@@ -111,7 +113,8 @@ int main(int argc, char *argv[])
     }
     return 0;
 }
-void check(string val)
+
+void check(string val,int numb)
 {	
 //vector <string> input;
 string new_val;
@@ -164,13 +167,19 @@ string new_val;
 	{
 		cout<<"get";
 		 file=hold[1];
-		get_file(file);
+		get_file(file,numb);
+	}
+		else if((hold[0]=="put")||(hold[0]=="PUT"))
+	{
+		cout<<"get";
+		 file=hold[1];
+		put_file(file,numb);
 	}
 		else if((hold[0]=="del")||(hold[0]=="DEL"))
 	{
 		cout<<"del";
 		 file=hold[1];
-		del_file(file);
+		del_file(file,numb);
 				
 	}
 		else if((hold[0]=="quit")||(hold[0]=="QUIT"))
@@ -244,30 +253,115 @@ void useracc(string val,string val2)
 		}
  file2.close();
 }
-void get_file(string filename)
+void get_file(string filename,int numb)
 {
 	//string filename;
+	int byte;
 	ifstream infile;
 	cout<<" file name"<<filename;
 	char msgz[filename.size() + 1];
 	  strcpy(msgz, filename.c_str());
 	infile.open(msgz);
-	string text;
+	if(infile.is_open()){
+			string text;
+	string text2;
 	while(getline(infile,text))
 	{
-		cout<<text<<"\n";
+		text2=text2+text+"\n";
+		
 	}
+	
+	char message[text2.size() + 1];
+	  strcpy(message, text2.c_str());
+	 // cout<<message<<"\n";
+	
+	byte=send(numb,message , sizeof(message), 0); 
 	infile.close();
+	}
+	else{
+		char info[]="404 File foobar not found.";
+		byte=send(numb,info , sizeof(info), 0); 
+	}
+
 }
-void del_file(string filename)
+void del_file(string filename,int numb)
 {
+	int byte;
+	
 	char msgz[filename.size() + 1];
 	 strcpy(msgz, filename.c_str());
 	if(remove(msgz)==0)
 	{
-		cout<<" File deleted ";
+			string len="200 File "+filename+" deleted.";
+	 	byte=send(numb,len , len.size(), 0);
 	}
 	else{
-		cout<<"File not deleted";
+		char info[DEFAULT_BUFLEN]="404 File "+filename+" is not on the server.";
+			byte=send(numb,info , sizeof(info), 0);
 	}
+	
 }
+char tochar(string word)
+{
+		char msgz[filename.size() + 1];
+	 strcpy(msgz, filename.c_str());
+	 return msgz;
+}
+
+void put_file(string filename,int numb)	
+{
+		char charac[filename.size() + 1];
+	  strcpy(charac, filename.c_str());
+	  ofstream file;
+	  file.open(charac);
+	  char buff[1024]={0};
+	  int size=0;
+	  if(file.is_open()){
+	  	memset(buff,0,sizeof(buff));
+	  	while((size=recv(numb,buff,sizeof(buff),0))>0){
+	  		file.write(buff,size);
+	  		if(size<sizeof(buff))
+	  		{
+	  			break;
+			  }
+		  }
+		  cout<<"saved";
+		  file.close();
+	  }
+	  else{
+	  	cout<<"failed";
+	  }
+/*	struct stat st;
+	FILE *fp=fopen(charac,"a");
+	if (fp==NULL)
+	{
+		cout<<"Open error";
+	}
+	int size;
+	unsigned char data[256]={0};
+	while(1)
+	{
+		
+		
+      stat(filename,&st);
+      size=st.st_size;
+      fread(data,1,256,fp); 
+	}
+	if(size>0)
+	{
+		write(numb,data,size);
+	}*/
+/*	int ch=0;
+	int words;
+	char buffer[255];
+	read(numb,&words,sizeof(int));
+	while(ch!=words)
+	{
+	write(numb,buffer,sizeof(buffer));
+		cout<<fp <<buffer;
+		ch++;
+	}
+	cout<<"successfull";
+	close(&fp);*/
+	}	
+
