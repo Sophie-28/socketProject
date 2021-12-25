@@ -25,7 +25,8 @@ using namespace std;
 void check(string val);
 void list(void);
 void useracc(string val,string val2);
-
+void get_file(string fname);
+void put_file(string filename);
 //void useracc(string val,string val2);
 
 void* Child(void* arg)
@@ -161,7 +162,20 @@ string new_val;
 		else if((hold[0]=="get")||(hold[0]=="GET"))
 	{
 		cout<<"get";
+		string file=hold[1];
+		get_file(file);
+	}
+		else if((hold[0]=="del")||(hold[0]=="DEL"))
+	{
+		cout<<"del";
 	
+			
+	}
+		else if((hold[0]=="quit")||(hold[0]=="QUIT"))
+	{
+		cout<<"quit";
+	
+			
 	}
 	
 }
@@ -226,4 +240,19 @@ void useracc(string val,string val2)
 			cout<<"not ";
 		}
  file2.close();
+}
+void get_file(string filename)
+{
+	//string filename;
+	ifstream infile;
+	cout<<" file name"<<filename;
+	char msgz[filename.size() + 1];
+	  strcpy(msgz, filename.c_str());
+	infile.open(msgz);
+	string text;
+	while(getline(infile,text))
+	{
+		cout<<text<<"\n";
+	}
+	infile.close();
 }
