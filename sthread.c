@@ -26,7 +26,7 @@ void check(string val);
 void list(void);
 void useracc(string val,string val2);
 void get_file(string fname);
-void put_file(string filename);
+void del_file(string filename);
 //void useracc(string val,string val2);
 
 void* Child(void* arg)
@@ -145,6 +145,7 @@ string new_val;
 	{
 		array_input[i]=input[i];
 	}*/
+	string file;
 	if((hold[0]=="user")||(hold[0]=="USER"))
 	{
 		cout<<"user";
@@ -156,26 +157,28 @@ string new_val;
 	else if((hold[0]=="list")||(hold[0]=="LIST"))
 	{
 		cout<<"list";
-	
-			list();
+		 
+	     list();
 	}
 		else if((hold[0]=="get")||(hold[0]=="GET"))
 	{
 		cout<<"get";
-		string file=hold[1];
+		 file=hold[1];
 		get_file(file);
 	}
 		else if((hold[0]=="del")||(hold[0]=="DEL"))
 	{
 		cout<<"del";
-	
-			
+		 file=hold[1];
+		del_file(file);
+				
 	}
 		else if((hold[0]=="quit")||(hold[0]=="QUIT"))
 	{
 		cout<<"quit";
-	
-			
+		cout<<"goodbye";
+	exit(1);
+				
 	}
 	
 }
@@ -255,4 +258,16 @@ void get_file(string filename)
 		cout<<text<<"\n";
 	}
 	infile.close();
+}
+void del_file(string filename)
+{
+	char msgz[filename.size() + 1];
+	 strcpy(msgz, filename.c_str());
+	if(remove(msgz)==0)
+	{
+		cout<<" File deleted ";
+	}
+	else{
+		cout<<"File not deleted";
+	}
 }
