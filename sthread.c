@@ -24,7 +24,7 @@ using namespace std;
 
 void check(string val,int numb);
 void list(int numb);
-void useracc(string val,string val2);
+void useracc(string val,string val2,int numb);
 void get_file(string fname,int numb);
 void put_file(string filename,int numb);
 void del_file(string filename,int numb);
@@ -138,7 +138,7 @@ string new_val;
 		string vec;
 		getline(ss,vec,',');
 		hold[index]=vec;
-		cout<<hold[index]<<"\t";
+	//	cout<<hold[index]<<"\t";
 		index++;
 	//	input.push_back(vec);
 	
@@ -155,7 +155,7 @@ string new_val;
 		cout<<"user";
 			string name=hold[1];
 		string pass=hold[2];
-		useracc(name,pass);
+		useracc(name,pass,numb);
 		
 	}
 	else if((hold[0]=="list")||(hold[0]=="LIST"))
@@ -233,47 +233,48 @@ void list(int numb){
     closedir(d);
   } 
 }
-void useracc(string val,string val2)
+void useracc(string val,string val2,int numb)
 {
 //	cout<<"stage0";	
-	ifstream file2("/home/student/21810009/pass.txt");
-		if(!file2.is_open())
-		{
-			cout<<"Failed to open\n";
-		}	
-	//	cout<<"stage1";	
-			string b,a;
-			string line;
-			int i=0;
-			while(file2.good())
-			{
-				//cout<<"stage2";	
-				while(getline(file2, line))
-				{
-					cout<<"stage3";	
-					stringstream ss(line);
+int byte;
+int i=0;
+		string line;
+	ifstream infile;
+	string filename ="//home//student//21810009//pass.txt";
+	//cout<<" file name"<<filename;
+	char msgz[filename.size() + 1];
+	  strcpy(msgz, filename.c_str());
+
+	infile.open(msgz);
+	if(infile.is_open()){
+			string text;
+	string text2;
+	while(getline(infile,text))
+	{
+			text2=text2+text+"\n";
+				string b;
+				string a;
+			stringstream ss(text);
 					getline(ss,b,':');
 					getline(ss,a,':'); 
-						cout<<"\n^&&^"<<b;
 					cout<<a;
-				
-					if((b==val) && (a==val2))
-					{
-					
-						cout<<"userfound\n";
-						i++;
-							cout<<line<<"\n";
+						if((b==val) && (a==val2))
+					{		char mess[]="User found";
+						 byte=send(numb,mess , sizeof(mess), 0);
+				       	i++;
 					}
-				
-			}
-				
-						
-		}
-		if(i==0)
+		
+	}
+	
+	
+	infile.close();
+	}
+	if(i==0)
 		{
-			cout<<"not ";
+		//	cout<<"not ";
+				char mess[]="User not found";
+						 byte=send(numb,mess , sizeof(mess), 0);
 		}
- file2.close();
 }
 void get_file(string filename,int numb)
 {
@@ -386,4 +387,3 @@ void put_file(string filename,int numb)
 	cout<<"successfull";
 	close(&fp);*/
 	}	
-
