@@ -16,18 +16,19 @@
 #include <stdio.h> 
 #include <sys/stat.h>
 #define DEFAULT_BUFLEN 1024
-#define PORT 1090
+#define PORT 1099
 
 void PANIC(char* msg);
 #define PANIC(msg)  { perror(msg); exit(-1); }
 using namespace std;
 
 void check(string val,int numb);
-void list(void);
+void list(int numb);
 void useracc(string val,string val2);
 void get_file(string fname,int numb);
 void put_file(string filename,int numb);
 void del_file(string filename,int numb);
+string tocharfloat(int num);
 //void useracc(string val,string val2);
 
 void* Child(void* arg)
@@ -104,7 +105,7 @@ int main(int argc, char *argv[])
 
         client = accept(sd, (struct sockaddr*)&addr, &addr_size);
         
-        printf("Connected: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));//
+        printf("Connected: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
         if ( pthread_create(&child, NULL, Child, &client) != 0 )
             perror("Thread creation");
         else
@@ -161,7 +162,7 @@ string new_val;
 	{
 		cout<<"list";
 		 
-	     list();
+	     list(numb);
 	}
 		else if((hold[0]=="get")||(hold[0]=="GET"))
 	{
@@ -191,11 +192,25 @@ string new_val;
 	}
 	
 }
-void list(void){
+string tocharfloat(int num)
+{
+stringstream ss;
+ss << num;
+string str;
+ss>>str;
+return str;
+	}
+void list(int numb){
 	 DIR *d;
   struct dirent *dir;
   struct stat st;
   d = opendir(".");
+  
+  string strsize;
+  string y;
+  int byte;
+  string space=" ";
+  string nextline="\n";
   if (d)
   {
   	string d_name;
@@ -205,11 +220,18 @@ void list(void){
     	int size;
       stat(dir->d_name,&st);
       size=st.st_size;
-    cout<< dir->d_name<<" "<<size<<"\n";
-    }
+      strsize=tocharfloat(size);
+ y=y+dir->d_name+space +strsize+nextline; 
+   }
+ // cout<<y;
+ char text[y.size()+1];
+  strcpy(text, y.c_str());
+  // cout<<text;
+  byte=send(numb,text , sizeof(text), 0); 
+   
 
     closedir(d);
-  }
+  } 
 }
 void useracc(string val,string val2)
 {
@@ -287,26 +309,26 @@ void get_file(string filename,int numb)
 void del_file(string filename,int numb)
 {
 	int byte;
+	string len;
 	
 	char msgz[filename.size() + 1];
 	 strcpy(msgz, filename.c_str());
 	if(remove(msgz)==0)
 	{
-			string len="200 File "+filename+" deleted.";
-	 	byte=send(numb,len , len.size(), 0);
+			len="200 File "+filename+" deleted.";
+			
+	 	//byte=send(numb,len , len.size(), 0);
 	}
 	else{
-		char info[DEFAULT_BUFLEN]="404 File "+filename+" is not on the server.";
-			byte=send(numb,info , sizeof(info), 0);
+		len="404 File "+filename+" is not on the server.";
+		//	byte=send(numb,info , sizeof(info), 0);
 	}
+		char mess[len.size() + 1];
+	 strcpy(mess, len.c_str());
+	 byte=send(numb,mess , sizeof(mess), 0);
 	
 }
-char tochar(string word)
-{
-		char msgz[filename.size() + 1];
-	 strcpy(msgz, filename.c_str());
-	 return msgz;
-}
+
 
 void put_file(string filename,int numb)	
 {
