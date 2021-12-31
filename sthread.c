@@ -66,9 +66,49 @@ void* Child(void* arg)
     return arg;
 }
 int main(int argc, char *argv[])
-{   int sd,opt,optval;
+{  
+	 string input;
+    getline(cin,input);
+    string new_input="";
+    string trStr;
+    int i=0;
+    for(i; i<input.length();i++)
+    {
+       if(input[i]==' ' && input[i+1]=='-' && (input[i+2]=='d' ||input[i+2]=='p' ||input[i+2]=='u'))
+        {
+            new_input+=",";
+            i=i+3;
+        }
+        else
+        {
+            new_input+=input[i];
+        }
+    }
+    vector<string> hold;
+    stringstream ss(new_input);
+
+    while (ss.good())
+    {
+        string substring;
+        getline(ss, substring, ',');
+        hold.push_back(substring);
+    }
+    int index = hold.size();
+    string arr[index];
+    for(int i = 0; i<hold.size(); i++)
+    {
+        arr[i]=hold[i];
+    }
+    for(int i = 0; i<(sizeof(arr)/sizeof(arr[0])); i++)
+    {
+
+        cout<<arr[i]<<" "<<endl;
+    }
+    
+ int sd,opt,optval;
     struct sockaddr_in addr;
     unsigned short port=0;
+    
 
     while ((opt = getopt(argc, argv, "p:")) != -1) {
         switch (opt) {
@@ -78,8 +118,7 @@ int main(int argc, char *argv[])
         }
     }
 
-
-    if ( (sd = socket(PF_INET, SOCK_STREAM, 0)) < 0 )
+ if ( (sd = socket(PF_INET, SOCK_STREAM, 0)) < 0 )
         PANIC("Socket");
     addr.sin_family = AF_INET;
 
@@ -387,7 +426,6 @@ void quit(int numb)
 	 close(numb);
 	
 }
-
 
 void put_file(string filename,int numb)	
 {
