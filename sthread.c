@@ -32,6 +32,7 @@ void put_file(string filename,int numb);
 void del_file(string filename,int numb);
 string tocharfloat(int num);
 string removespace(string str);
+void quit(int numb);
 //void useracc(string val,string val2);
 
 void* Child(void* arg)
@@ -205,9 +206,7 @@ string new_val;
 	}
 		if((cc=="quit")||(cc=="QUIT"))
 	{
-		cout<<"quit";
-		cout<<"goodbye";
-	exit(1);
+	quit(numb);
 				
 	}
 	
@@ -365,17 +364,27 @@ void del_file(string filename,int numb)
 	 strcpy(msgz, filename.c_str());
 	if(remove(msgz)==0)
 	{
-			len="200 File "+filename+" deleted.";
+			len="200 File "+filename+" deleted.\n";
 			
 	 	//byte=send(numb,len , len.size(), 0);
 	}
 	else{
-		len="404 File "+filename+" is not on the server.";
+		len="404 File "+filename+" is not on the server.\n";
 		//	byte=send(numb,info , sizeof(info), 0);
 	}
 		char mess[len.size() + 1];
 	 strcpy(mess, len.c_str());
 	 byte=send(numb,mess , sizeof(mess), 0);
+	
+}
+void quit(int numb)
+{
+	int byte;
+	string message="Goodbye!";
+		char mess[message.size() + 1];
+	 strcpy(mess, message.c_str());
+	 byte=send(numb,mess , sizeof(mess), 0);
+	 close(numb);
 	
 }
 
