@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <sstream> 
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
@@ -9,12 +10,13 @@
 #include <pthread.h>
 #include <string>
 #include <iostream>
-//#include <vector>
+#include <vector>
 #include <sstream>
 #include <fstream>
 #include <dirent.h> 
 #include <stdio.h> 
 #include <sys/stat.h>
+#include <string>
 #define DEFAULT_BUFLEN 1024
 #define PORT 1099
 
@@ -29,6 +31,7 @@ void get_file(string fname,int numb);
 void put_file(string filename,int numb);
 void del_file(string filename,int numb);
 string tocharfloat(int num);
+string removespace(string str);
 //void useracc(string val,string val2);
 
 void* Child(void* arg)
@@ -44,6 +47,7 @@ void* Child(void* arg)
         bytes_read = recv(client, line, sizeof(line), 0);
         if (bytes_read > 0) {
 		check(line,client);
+		memset(line,0,sizeof(line));
      if ( (bytes_read=send(client, line, bytes_read, 0)) < 0 ) {
                         printf("Send failed\n");
                     
@@ -117,7 +121,7 @@ int main(int argc, char *argv[])
 
 void check(string val,int numb)
 {	
-//vector <string> input;
+
 string new_val;
 
 	for(int i=0;i<val.length();i++)
@@ -133,63 +137,80 @@ string new_val;
 	int index=0;
 	string hold[3];
 	stringstream ss(new_val);
+	vector<string> commands;
 	while(ss.good())
 	{
-		string vec;
+		string vec="";
 		getline(ss,vec,',');
-		hold[index]=vec;
+		if(vec=="")
+		{
+			commands.push_back(vec);
+			hold[index]=new_val;
+		}
+		commands.push_back(vec);
+	//	hold[index]=vec;
 	//	cout<<hold[index]<<"\t";
-		index++;
+	//	index++;
 	//	input.push_back(vec);
-	
 	}
-	
-/*	string array_input[input.size()];
-	for(int i=0;i<hold.size();i++)
+	cout<<commands.size()<<endl;
+	string c = commands[0];
+	string cc=removespace(c);
+	for(int i =0; i<cc.length();i++)
 	{
-		array_input[i]=input[i];
-	}*/
+		cout<<"-"<<cc[i]<<endl;
+	}
+
+
+	for(int i=0;i<3;i++)
+	{
+		cout<<hold[i]<<endl;
+	}
 	string file;
-	if((hold[0]=="user")||(hold[0]=="USER"))
+	if((cc=="user")||(cc=="USER"))
 	{
 		cout<<"user";
-			string name=hold[1];
-		string pass=hold[2];
+			string name=removespace(commands[1]);
+		string pass=removespace(commands[2]);
 		useracc(name,pass,numb);
 		
 	}
-	else if((hold[0]=="list")||(hold[0]=="LIST"))
+	if((cc=="list")||(cc=="LIST"))
 	{
 		cout<<"list";
 		 
 	     list(numb);
 	}
-		else if((hold[0]=="get")||(hold[0]=="GET"))
+ 	if((cc=="get")||(cc=="GET"))
 	{
 		cout<<"get";
-		 file=hold[1];
-		get_file(file,numb);
+			file=commands[1];
+		 string file2=removespace(file);
+		get_file(file2,numb);
 	}
-		else if((hold[0]=="put")||(hold[0]=="PUT"))
+		if((cc=="put")||(cc=="PUT"))
 	{
 		cout<<"get";
-		 file=hold[1];
-		put_file(file,numb);
+			file=commands[1];
+		 string file2=removespace(file);
+		put_file(file2,numb);
 	}
-		else if((hold[0]=="del")||(hold[0]=="DEL"))
+		if((cc=="del")||(cc=="DEL"))
 	{
 		cout<<"del";
-		 file=hold[1];
-		del_file(file,numb);
+		 	file=commands[1];
+		 string file2=removespace(file);
+		del_file(file2,numb);
 				
 	}
-		else if((hold[0]=="quit")||(hold[0]=="QUIT"))
+		if((cc=="quit")||(cc=="QUIT"))
 	{
 		cout<<"quit";
 		cout<<"goodbye";
 	exit(1);
 				
 	}
+	
 	
 }
 string tocharfloat(int num)
@@ -200,6 +221,20 @@ string str;
 ss>>str;
 return str;
 	}
+string removespace(string str){
+    
+   string result="";
+    int i=0;
+    while (str[i]!='\0')
+    {
+        if(!isspace(str[i])){
+            result+=str[i];
+
+        }
+        i++;
+    }
+   return result;
+}
 void list(int numb){
 	 DIR *d;
   struct dirent *dir;
@@ -235,46 +270,60 @@ void list(int numb){
 }
 void useracc(string val,string val2,int numb)
 {
-//	cout<<"stage0";	
 int byte;
 int i=0;
-		string line;
-	ifstream infile;
-	string filename ="//home//student//21810009//pass.txt";
-	//cout<<" file name"<<filename;
-	char msgz[filename.size() + 1];
-	  strcpy(msgz, filename.c_str());
-
-	infile.open(msgz);
-	if(infile.is_open()){
-			string text;
-	string text2;
-	while(getline(infile,text))
-	{
-			text2=text2+text+"\n";
-				string b;
-				string a;
-			stringstream ss(text);
-					getline(ss,b,':');
-					getline(ss,a,':'); 
-					cout<<a;
-						if((b==val) && (a==val2))
-					{		char mess[]="User found";
-						 byte=send(numb,mess , sizeof(mess), 0);
-				       	i++;
-					}
 		
-	}
-	
-	
-	infile.close();
+	ifstream infile;
+	FILE *filePointer;
+	char line[DEFAULT_BUFLEN];
+	if ((filePointer = fopen("pass.txt", "r")) == NULL)
+	        {
+	        	cout<<" could not read file !"<<endl;
+	        	
+			}
+        
+	    while (fgets(line, DEFAULT_BUFLEN, filePointer) != NULL) {
+         //cout<<line<<endl;
+        
+        vector<string> getUser;
+        stringstream ss(line);
+
+        while (ss.good())
+        {
+            
+            string substring="";
+            getline(ss, substring, ':');
+            getUser.push_back(substring);
+        }
+        
+        string name=removespace(getUser[0]);
+        string password=removespace(getUser[1]);
+
+    
+		if(val==name && val2==password)
+		{
+			cout<<"user exist"<<endl;
+		//	cout<<name;
+		//	cout<<password;
+				char mess[]="User found\n";
+				 byte=send(numb,mess , sizeof(mess), 0);
+				 i++;
+		}
+		infile.close();
 	}
 	if(i==0)
 		{
 		//	cout<<"not ";
-				char mess[]="User not found";
+				char mess[]="User not found\n";
 						 byte=send(numb,mess , sizeof(mess), 0);
 		}
+//	return;
+	//if(i==0)
+		//{
+		//	cout<<"not ";
+	//			char mess[]="User not found";
+		//				 byte=send(numb,mess , sizeof(mess), 0);
+	//	}
 }
 void get_file(string filename,int numb)
 {
