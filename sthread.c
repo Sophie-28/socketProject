@@ -17,13 +17,16 @@
 #include <stdio.h> 
 #include <sys/stat.h>
 #include <string>
+#include<cmath>
 #define DEFAULT_BUFLEN 1024
-#define PORT 1099
+//#define PORT 1099
 
 void PANIC(char* msg);
 #define PANIC(msg)  { perror(msg); exit(-1); }
 using namespace std;
 
+string dir_path;
+int PORT;
 void check(string val,int numb);
 void list(int numb);
 void useracc(string val,string val2,int numb);
@@ -33,6 +36,8 @@ void del_file(string filename,int numb);
 string tocharfloat(int num);
 string removespace(string str);
 void quit(int numb);
+void input_line();
+int toint(string numstr);
 //void useracc(string val,string val2);
 
 void* Child(void* arg)
@@ -65,46 +70,12 @@ void* Child(void* arg)
     close(client);
     return arg;
 }
+
+
 int main(int argc, char *argv[])
-{  
-	 string input;
-    getline(cin,input);
-    string new_input="";
-    string trStr;
-    int i=0;
-    for(i; i<input.length();i++)
-    {
-       if(input[i]==' ' && input[i+1]=='-' && (input[i+2]=='d' ||input[i+2]=='p' ||input[i+2]=='u'))
-        {
-            new_input+=",";
-            i=i+3;
-        }
-        else
-        {
-            new_input+=input[i];
-        }
-    }
-    vector<string> hold;
-    stringstream ss(new_input);
+{      
 
-    while (ss.good())
-    {
-        string substring;
-        getline(ss, substring, ',');
-        hold.push_back(substring);
-    }
-    int index = hold.size();
-    string arr[index];
-    for(int i = 0; i<hold.size(); i++)
-    {
-        arr[i]=hold[i];
-    }
-    for(int i = 0; i<(sizeof(arr)/sizeof(arr[0])); i++)
-    {
-
-        cout<<arr[i]<<" "<<endl;
-    }
-    
+input_line();
  int sd,opt,optval;
     struct sockaddr_in addr;
     unsigned short port=0;
@@ -158,6 +129,92 @@ int main(int argc, char *argv[])
     }
     return 0;
 }
+void input_line()
+{
+		 string input;
+    getline(cin,input);
+    string new_input="";
+    string trStr;
+    int i=0;
+    for(i; i<input.length();i++)
+    {
+       if(input[i]==' ' && input[i+1]=='-' && (input[i+2]=='d' ||input[i+2]=='p' ||input[i+2]=='u'))
+        {
+            new_input+=",";
+            i=i+3;
+        }
+        else
+        {
+            new_input+=input[i];
+        }
+    }
+    vector<string> hold;
+    stringstream ss(new_input);
+
+    while (ss.good())
+    {
+        string substring;
+        getline(ss, substring, ',');
+        hold.push_back(substring);
+    }
+    int index = hold.size();
+    string arr[index];
+    for(int i = 0; i<hold.size(); i++)
+    {
+        arr[i]=hold[i];
+    }
+    for(int i = 0; i<(sizeof(arr)/sizeof(arr[0])); i++)
+    {
+
+        cout<<arr[i]<<" "<<endl;
+    }
+    string dir;
+    string text;
+   int prt;
+    dir=removespace(arr[1]);
+   // prt=removespace(arr[2]);
+    text=removespace(arr[3]);
+    
+     dir_path=dir;
+    cout<<"path :"<<dir_path<<"\n";
+   prt= toint(arr[2]);
+   PORT=prt;
+    //stringstream prt(arr[1]);
+    //prt>>PORT;
+    //cout<<dir<<"\t"<<prt<<"\t"<<text;
+    //	string c="cd " +path;
+	
+	 char mess[dir.size() + 1];
+        strcpy(mess, dir.c_str());
+        
+         DIR* d;
+        // d = opendir(mess);
+        if (d)
+        {
+        
+        	
+            d = opendir(mess);
+            //chdir(mess);
+            cout<<"path directry found"<<endl;
+           // closedir(d);
+           // pas=false;
+        }
+        else
+        {
+            cout<<"path directry does not exit"<<endl;
+            
+        }
+}
+int toint(string numstr)
+	{
+		int num=0,size=numstr.size();
+		int j=size;
+		for(int i=0;i<size;i++)
+		{
+			num+=(numstr[--j]-'0')*pow(10,i);
+		}
+		return num;
+	}
 
 void check(string val,int numb)
 {	
@@ -274,11 +331,12 @@ string removespace(string str){
    return result;
 }
 void list(int numb){
+	char text1[dir_path.size()+1];
+  strcpy(text1, dir_path.c_str());
 	 DIR *d;
   struct dirent *dir;
   struct stat st;
-  d = opendir(".");
-  
+  d = opendir(text1);
   string strsize;
   string y;
   int byte;
@@ -368,9 +426,9 @@ void get_file(string filename,int numb)
 	//string filename;
 	int byte;
 	ifstream infile;
-	cout<<" file name"<<filename;
-	char msgz[filename.size() + 1];
-	  strcpy(msgz, filename.c_str());
+	string filename2=dir_path+"/"+filename;
+	char msgz[filename2.size() + 1];
+	  strcpy(msgz, filename2.c_str());
 	infile.open(msgz);
 	if(infile.is_open()){
 			string text;
@@ -399,8 +457,9 @@ void del_file(string filename,int numb)
 	int byte;
 	string len;
 	
-	char msgz[filename.size() + 1];
-	 strcpy(msgz, filename.c_str());
+	string filename2=dir_path+"/"+filename;
+	char msgz[filename2.size() + 1];
+	  strcpy(msgz, filename2.c_str());
 	if(remove(msgz)==0)
 	{
 			len="200 File "+filename+" deleted.\n";
