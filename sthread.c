@@ -27,6 +27,8 @@ using namespace std;
 
 string dir_path;
 int PORT;
+string pass_file;
+bool user_check = false;
 void check(string val,int numb);
 void list(int numb);
 void useracc(string val,string val2,int numb);
@@ -153,20 +155,15 @@ void input_line()
 
     while (ss.good())
     {
-        string substring;
-        getline(ss, substring, ',');
-        hold.push_back(substring);
+        string hold_string;
+        getline(ss, hold_string, ',');
+        hold.push_back(hold_string);
     }
     int index = hold.size();
     string arr[index];
     for(int i = 0; i<hold.size(); i++)
     {
         arr[i]=hold[i];
-    }
-    for(int i = 0; i<(sizeof(arr)/sizeof(arr[0])); i++)
-    {
-
-        cout<<arr[i]<<" "<<endl;
     }
     string dir;
     string text;
@@ -176,9 +173,10 @@ void input_line()
     text=removespace(arr[3]);
     
      dir_path=dir;
-    cout<<"path :"<<dir_path<<"\n";
+   // cout<<"path :"<<dir_path<<"\n";
    prt= toint(arr[2]);
    PORT=prt;
+   pass_file=text;
     //stringstream prt(arr[1]);
     //prt>>PORT;
     //cout<<dir<<"\t"<<prt<<"\t"<<text;
@@ -195,15 +193,28 @@ void input_line()
         	
             d = opendir(mess);
             //chdir(mess);
-            cout<<"path directry found"<<endl;
+            cout<<" File server listening on localhost port "<<prt<<endl;
            // closedir(d);
            // pas=false;
         }
         else
         {
-            cout<<"path directry does not exit"<<endl;
+            cout<<"directry does not exit"<<endl;
             
         }
+         char mess2[pass_file.size() + 1];
+        strcpy(mess2, pass_file.c_str());
+      FILE *file;
+
+        if ((file = fopen(mess2, "r")) == NULL)
+	        {
+	        	cout<<" could not read file \n";
+			}
+            else{
+			}
+	           
+            
+        fclose(file);   
 }
 int toint(string numstr)
 	{
@@ -253,26 +264,17 @@ string new_val;
 	cout<<commands.size()<<endl;
 	string c = commands[0];
 	string cc=removespace(c);
-	for(int i =0; i<cc.length();i++)
-	{
-		cout<<"-"<<cc[i]<<endl;
-	}
 
-
-	for(int i=0;i<3;i++)
-	{
-		cout<<hold[i]<<endl;
-	}
 	string file;
 	if((cc=="user")||(cc=="USER"))
 	{
-		cout<<"user";
 			string name=removespace(commands[1]);
 		string pass=removespace(commands[2]);
 		useracc(name,pass,numb);
 		
 	}
-	if((cc=="list")||(cc=="LIST"))
+	if(user_check){
+		if((cc=="list")||(cc=="LIST"))
 	{
 		cout<<"list";
 		 
@@ -305,7 +307,9 @@ string new_val;
 	quit(numb);
 				
 	}
-	
+		
+	}
+
 	
 }
 string tocharfloat(int num)
@@ -372,7 +376,10 @@ int i=0;
 	ifstream infile;
 	FILE *filePointer;
 	char line[DEFAULT_BUFLEN];
-	if ((filePointer = fopen("pass.txt", "r")) == NULL)
+	char msgz[pass_file.size() + 1];
+	  strcpy(msgz, pass_file.c_str());
+	
+	if ((filePointer = fopen(msgz, "r")) == NULL)
 	        {
 	        	cout<<" could not read file !"<<endl;
 	        	
@@ -398,7 +405,7 @@ int i=0;
     
 		if(val==name && val2==password)
 		{
-			cout<<"user exist"<<endl;
+			user_check =true;
 		//	cout<<name;
 		//	cout<<password;
 				char mess[]="User found\n";
@@ -478,7 +485,7 @@ void del_file(string filename,int numb)
 void quit(int numb)
 {
 	int byte;
-	string message="Goodbye!";
+	string message="Goodbye!\n";
 		char mess[message.size() + 1];
 	 strcpy(mess, message.c_str());
 	 byte=send(numb,mess , sizeof(mess), 0);
@@ -488,11 +495,14 @@ void quit(int numb)
 
 void put_file(string filename,int numb)	
 {
-		char charac[filename.size() + 1];
-	  strcpy(charac, filename.c_str());
+	int byte;
+	string len;
+	string filename2=dir_path+"/"+filename;
+		char charac[filename2.size() + 1];
+	  strcpy(charac, filename2.c_str());
 	  ofstream file;
 	  file.open(charac);
-	  char buff[1024]={0};
+	  char buff[DEFAULT_BUFLEN]={0};
 	  int size=0;
 	  if(file.is_open()){
 	  	memset(buff,0,sizeof(buff));
@@ -503,12 +513,23 @@ void put_file(string filename,int numb)
 	  			break;
 			  }
 		  }
-		  cout<<"saved";
+		  
+		  //cout<<"saved";
+		  	len="200  "+filename+" retrieved by server and was saved.\n";
+		  		char mess[len.size() + 1];
+	 strcpy(mess, len.c_str());
+	 byte=send(numb,mess , sizeof(mess), 0);
 		  file.close();
 	  }
-	  else{
-	  	cout<<"failed";
-	  }
+	  
+	  
+		
+			
+	 	//byte=send(numb,len , len.size(), 0);
+	
+
+		
+		//	byte=send(numb,info , sizeof(info), 0);
 /*	struct stat st;
 	FILE *fp=fopen(charac,"a");
 	if (fp==NULL)
@@ -541,4 +562,4 @@ void put_file(string filename,int numb)
 	}
 	cout<<"successfull";
 	close(&fp);*/
-	}	
+	}
