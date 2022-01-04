@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include <string>
 #include<cmath>
+
 #define DEFAULT_BUFLEN 1024
 //#define PORT 1099
 
@@ -46,13 +47,11 @@ void* Child(void* arg)
 {   char line[DEFAULT_BUFLEN];
     int bytes_read;
     int client = *(int *)arg;
-    char welmessag[DEFAULT_BUFLEN]="Welcome to Bob's Server \n";
-
+    char welmessag[DEFAULT_BUFLEN]="Welcome to Bob's Server \n"; // displayes the welcome message to the client
+	bytes_read=send(client,welmessag , sizeof(welmessag), 0);
     do
     {
-    	bytes_read=send(client,welmessag , sizeof(welmessag), 0); // displayes the welcome message to the client
-    	
-        bytes_read = recv(client, line, sizeof(line), 0);
+      bytes_read = recv(client, line, sizeof(line), 0);
         if (bytes_read > 0) {
 		check(line,client);
 		memset(line,0,sizeof(line));
@@ -112,7 +111,7 @@ input_line();
     if ( listen(sd, SOMAXCONN) != 0 )
         PANIC("Listen");
 
-    printf("System ready on port %d\n",ntohs(addr.sin_port));
+   // printf("System ready on port %d\n",ntohs(addr.sin_port));
 
     while (1)
     {
@@ -256,12 +255,9 @@ string new_val;
 			hold[index]=new_val;
 		}
 		commands.push_back(vec);
-	//	hold[index]=vec;
-	//	cout<<hold[index]<<"\t";
-	//	index++;
-	//	input.push_back(vec);
+	
 	}
-	cout<<commands.size()<<endl;
+//	cout<<commands.size()<<endl;
 	string c = commands[0];
 	string cc=removespace(c);
 
@@ -276,27 +272,23 @@ string new_val;
 	if(user_check){
 		if((cc=="list")||(cc=="LIST"))
 	{
-		cout<<"list";
 		 
 	     list(numb);
 	}
  	if((cc=="get")||(cc=="GET"))
 	{
-		cout<<"get";
 			file=commands[1];
 		 string file2=removespace(file);
 		get_file(file2,numb);
 	}
 		if((cc=="put")||(cc=="PUT"))
 	{
-		cout<<"get";
 			file=commands[1];
 		 string file2=removespace(file);
 		put_file(file2,numb);
 	}
 		if((cc=="del")||(cc=="DEL"))
 	{
-		cout<<"del";
 		 	file=commands[1];
 		 string file2=removespace(file);
 		del_file(file2,numb);
@@ -358,10 +350,10 @@ void list(int numb){
       strsize=tocharfloat(size);
  y=y+dir->d_name+space +strsize+nextline; 
    }
- // cout<<y;
+
  char text[y.size()+1];
   strcpy(text, y.c_str());
-  // cout<<text;
+ 
   byte=send(numb,text , sizeof(text), 0); 
    
 
@@ -372,7 +364,7 @@ void useracc(string val,string val2,int numb)
 {
 int byte;
 int i=0;
-		
+string usermess;		
 	ifstream infile;
 	FILE *filePointer;
 	char line[DEFAULT_BUFLEN];
@@ -386,7 +378,6 @@ int i=0;
 			}
         
 	    while (fgets(line, DEFAULT_BUFLEN, filePointer) != NULL) {
-         //cout<<line<<endl;
         
         vector<string> getUser;
         stringstream ss(line);
@@ -406,27 +397,22 @@ int i=0;
 		if(val==name && val2==password)
 		{
 			user_check =true;
-		//	cout<<name;
-		//	cout<<password;
-				char mess[]="User found\n";
-				 byte=send(numb,mess , sizeof(mess), 0);
+						
+				 //usermess="200 User "+val+" granted to access\n";
+				 	char mess[]="200 User granted to access\n";
+				 byte=send(numb,mess, sizeof(mess), 0);
 				 i++;
 		}
 		infile.close();
 	}
 	if(i==0)
 		{
-		//	cout<<"not ";
-				char mess[]="User not found\n";
+		
+		
+				char mess[]="400 User not found. Please try with another user\n";
 						 byte=send(numb,mess , sizeof(mess), 0);
 		}
-//	return;
-	//if(i==0)
-		//{
-		//	cout<<"not ";
-	//			char mess[]="User not found";
-		//				 byte=send(numb,mess , sizeof(mess), 0);
-	//	}
+
 }
 void get_file(string filename,int numb)
 {
@@ -448,7 +434,7 @@ void get_file(string filename,int numb)
 	
 	char message[text2.size() + 1];
 	  strcpy(message, text2.c_str());
-	 // cout<<message<<"\n";
+	 
 	
 	byte=send(numb,message , sizeof(message), 0); 
 	infile.close();
@@ -522,44 +508,5 @@ void put_file(string filename,int numb)
 		  file.close();
 	  }
 	  
-	  
-		
-			
-	 	//byte=send(numb,len , len.size(), 0);
-	
 
-		
-		//	byte=send(numb,info , sizeof(info), 0);
-/*	struct stat st;
-	FILE *fp=fopen(charac,"a");
-	if (fp==NULL)
-	{
-		cout<<"Open error";
-	}
-	int size;
-	unsigned char data[256]={0};
-	while(1)
-	{
-		
-		
-      stat(filename,&st);
-      size=st.st_size;
-      fread(data,1,256,fp); 
-	}
-	if(size>0)
-	{
-		write(numb,data,size);
-	}*/
-/*	int ch=0;
-	int words;
-	char buffer[255];
-	read(numb,&words,sizeof(int));
-	while(ch!=words)
-	{
-	write(numb,buffer,sizeof(buffer));
-		cout<<fp <<buffer;
-		ch++;
-	}
-	cout<<"successfull";
-	close(&fp);*/
-	}
+	}	
